@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	bedrock.Scan("d:/mcpe/world/db")
-	bedrock.ReadNbtFile("d:/mcpe/world/level.dat")
+	bedrock.Scan("maps/mcpe-simple/db")
+	bedrock.ReadNbtFile("maps/mcpe-simple/level.dat")
 
 }

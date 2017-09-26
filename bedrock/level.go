@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/crystalmine/mapper/nbt"
+
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -56,8 +58,10 @@ func Scan(fname string) {
 					x, z := unmarshalChunkPos(key)
 					fmt.Println("Chunk", x, z, "Version", value)
 				case TagBlockEntity:
+					readAll(nbt.NewReader(value))
 					// nbt.ReadAll(value)
 				case TagEntity:
+					readAll(nbt.NewReader(value))
 					// nbt.ReadAll(value)
 				case TagBiomeState:
 				case TagFinalizedState:
