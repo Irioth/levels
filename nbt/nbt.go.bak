@@ -1,4 +1,3 @@
-//go:generate stringer --type=TagType
 package nbt
 
 import (
@@ -7,22 +6,6 @@ import (
 	// "io"
 	"fmt"
 	"math"
-)
-
-type TagType byte
-
-const (
-	Tag_END TagType = iota
-	Tag_Byte
-	Tag_Short
-	Tag_Int
-	Tag_Long
-	Tag_Float
-	_
-	_
-	Tag_String
-	Tag_List
-	Tag_Compound
 )
 
 type Writer struct {
@@ -47,7 +30,7 @@ func (w *Writer) Byte(v byte) {
 	w.pos++
 }
 
-func (w *Writer) Type(t TagType) {
+func (w *Writer) Type(t TagId) {
 	w.Byte(byte(t))
 }
 
@@ -93,7 +76,7 @@ func ConvertToNetAll(data []byte) []byte {
 	return w.Cut()
 }
 
-func ConvertTag(r *Reader, w *Writer) TagType {
+func ConvertTag(r *Reader, w *Writer) TagId {
 	ttype := r.Type()
 	w.Type(ttype)
 	if ttype == Tag_END {
@@ -104,7 +87,7 @@ func ConvertTag(r *Reader, w *Writer) TagType {
 	return ttype
 }
 
-func ConvertValue(ttype TagType, r *Reader, w *Writer) {
+func ConvertValue(ttype TagId, r *Reader, w *Writer) {
 	switch ttype {
 	case Tag_Byte:
 		w.Byte(r.Byte())
@@ -155,7 +138,7 @@ func Read(data []byte) {
 	ReadTag(r)
 }
 
-func ReadTag(r *Reader) TagType {
+func ReadTag(r *Reader) TagId {
 	ttype := r.Type()
 	fmt.Println(ttype)
 	if ttype == Tag_END {
@@ -167,7 +150,7 @@ func ReadTag(r *Reader) TagType {
 	return ttype
 }
 
-func ReadValue(ttype TagType, r *Reader) {
+func ReadValue(ttype TagId, r *Reader) {
 	switch ttype {
 	case Tag_Byte:
 		fmt.Println(r.Byte())
@@ -216,11 +199,11 @@ func NewReader(data []byte) *Reader {
 	return &Reader{data, 0, false}
 }
 
-func (r *Reader) Type() TagType {
+func (r *Reader) Type() TagId {
 	if r.Remaining() == 0 {
 		return Tag_END
 	}
-	return TagType(r.Byte())
+	return TagId(r.Byte())
 }
 
 func (r *Reader) String() ByteString {
@@ -278,7 +261,7 @@ func (r *Reader) Byte() byte {
 	return b
 }
 
-func (r *Reader) Skip(tag TagType) {
+func (r *Reader) Skip(tag TagId) {
 	switch tag {
 	case Tag_Byte:
 		r.Byte()
