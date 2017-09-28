@@ -1,10 +1,6 @@
 package anvil
 
 import (
-	"bytes"
-	"compress/gzip"
-	"io/ioutil"
-
 	"github.com/crystalmine/levels/nbt"
 	"github.com/kr/pretty"
 )
@@ -27,25 +23,5 @@ func scanFile(fname string) {
 		panic(err)
 	}
 	pretty.Println(name, res)
-
-}
-
-func readGzipped(fname string) ([]byte, error) {
-	data, err := ioutil.ReadFile(fname)
-	if err != nil {
-		return nil, err
-	}
-
-	gz, err := gzip.NewReader(bytes.NewReader(data))
-	if err != nil {
-		return nil, err
-	}
-
-	raw, err := ioutil.ReadAll(gz)
-	if err != nil {
-		return nil, err
-	}
-
-	return raw, nil
 
 }

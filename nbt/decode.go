@@ -63,6 +63,20 @@ func (d *Decoder) readValue(tag TagId) (interface{}, error) {
 		return r.Float64(), nil
 	case Tag_String:
 		return r.String(), nil
+	case Tag_Byte_Array:
+		l := int(r.Int32())
+		res := make([]byte, l)
+		for i := 0; i < l; i++ {
+			res[i] = r.Byte()
+		}
+		return res, nil
+	case Tag_Int_Array:
+		l := int(r.Int32())
+		res := make([]int32, l)
+		for i := 0; i < l; i++ {
+			res[i] = r.Int32()
+		}
+		return res, nil
 	case Tag_List:
 		listTag := r.Type()
 		l := int(r.Int32())
