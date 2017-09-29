@@ -1,8 +1,8 @@
 package convert
 
 import (
-	"encoding/hex"
-	"fmt"
+	"crystal/mc"
+	"crystal/mc/world"
 
 	"github.com/rs/zerolog/log"
 
@@ -29,6 +29,7 @@ func PC2PE(pcpath, pepath string) error {
 
 	for _, pos := range pc.Regions {
 		r, err := pc.LoadRegion(pos)
+		log.Info().Interface("pos", pos).Msg("Procession region")
 		if err != nil {
 			log.Error().Err(err).Int("x", pos.X).Int("z", pos.Z).Msg("Failed to load region")
 			continue
@@ -41,8 +42,6 @@ func PC2PE(pcpath, pepath string) error {
 			}
 
 		}
-		log.Info().Interface("pos", pos).Msg("Region loaded")
-		break
 	}
 
 	return nil
@@ -52,7 +51,7 @@ func convChunk(db *bedrock.DB, c anvil.Chunk) error {
 	key := make([]byte, 10)
 	bedrock.MarshalChunkPos(key, bedrock.ChunkPos(c.ChunkPos))
 
-	fmt.Println(hex.Dump(key))
+	// fmt.Println(hex.Dump(key))
 
 	// Version
 	key[8] = byte(bedrock.TagVersion)
@@ -63,6 +62,10 @@ func convChunk(db *bedrock.DB, c anvil.Chunk) error {
 	data := make([]byte, 512+256)
 	for i := 0; i < 256; i++ {
 		data[2*i] = byte(c.Data.HeightMap[i])
+		if len(c.Data.Biomes) <= i {
+			// fmt.Println("biomes", len(c.Data.Biomes))
+			continue
+		}
 		data[512+i] = c.Data.Biomes[i]
 	}
 	key[8] = byte(bedrock.TagData2D)
@@ -75,8 +78,35 @@ func convChunk(db *bedrock.DB, c anvil.Chunk) error {
 		return err
 	}
 
-	// SubChunks
-	for i, s := range c.Data.Sections {
+	// Sections
+	for _, s := range c.Data.Sections {
+
+		data := make([]byte, 1+4096+2048)
+		for x := 0; x < 16; x++ {
+			for y := 0; y < 16; y++ {
+				for z := 0; z < 16; z++ {
+					data[(x*16+z)*16+y+1] = s.Blocks[(y*16+z)*16+x]
+				}
+			}
+		}
+
+		q := world.NibbleArray(data[1+4096:])
+		qq := world.NibbleArray(s.Data)
+		for x := 0; x < 16; x++ {
+			for y := 0; y < 16; y++ {
+				for z := 0; z < 16; z++ {
+					q.Set(mc.BlockPos{x, y, z}, qq.Get(mc.BlockPos{y, x, z}))
+				}
+			}
+		}
+
+		// copy(data[1:], s.Blocks)
+		// copy(data[1+4096:], s.Data)
+		key[8] = byte(bedrock.TagSection)
+		key[9] = s.Y
+		if err := db.Put(key[:10], data); err != nil {
+			return err
+		}
 
 	}
 

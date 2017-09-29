@@ -90,27 +90,27 @@ func loadLevelDat(fname string) (*LevelData, error) {
 }
 
 func mapDecode(in interface{}, v interface{}) error {
-	if e := log.Debug(); e.Enabled() {
-		var md mapstructure.Metadata
-		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-			Metadata:         &md,
-			Result:           v,
-			WeaklyTypedInput: true,
-		})
-		if err != nil {
-			return err
-		}
-		if err := decoder.Decode(in); err != nil {
-			return err
-		}
-		e.Str("struct", reflect.TypeOf(v).Elem().String()).Strs("unused", md.Unused).Msg("Decoding NBT to struct.")
-		return nil
-	}
-
-	if err := mapstructure.WeakDecode(in, v); err != nil {
+	var md mapstructure.Metadata
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata:         &md,
+		Result:           v,
+		WeaklyTypedInput: true,
+	})
+	if err != nil {
 		return err
 	}
+	if err := decoder.Decode(in); err != nil {
+		return err
+	}
+	if len(md.Unused) > 0 {
+		log.Debug().Str("struct", reflect.TypeOf(v).Elem().String()).Strs("unused", md.Unused).Msg("Decoding NBT to struct.")
+	}
 	return nil
+
+	// if err := mapstructure.WeakDecode(in, v); err != nil {
+	// 	return err
+	// }
+	// return nil
 }
 
 func readGzipped(fname string) ([]byte, error) {

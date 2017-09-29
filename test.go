@@ -12,15 +12,15 @@ import (
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	// zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	if true {
-		if false {
+		if true {
 			if err := convert.PC2PE("maps/anvil-kathal", "maps/mcpe-conv"); err != nil {
 				panic(err)
 			}
 		} else {
-			bedrock.Scan("maps/mcpe-conv/db")
+			bedrock.Scan("maps/mcpe-convx/db")
 			// bedrock.Scan("maps/mcpe-simple/db")
 			// bedrock.ReadNbtFile("maps/mcpe-simple/level.dat")
 		}

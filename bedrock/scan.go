@@ -11,8 +11,8 @@ import (
 type Tag byte
 
 const (
-	TagData2D   Tag = 0x2d // 45
-	TagSubChunk Tag = 0x2f // 47
+	TagData2D  Tag = 0x2d // 45
+	TagSection Tag = 0x2f // 47
 
 	TagBlockEntity Tag = 0x31 // 49
 	TagEntity      Tag = 0x32 // 50
@@ -50,9 +50,10 @@ func Scan(fname string) {
 			if len(key) == 9 {
 
 				tag := Tag(key[8])
+				// fmt.Println(tag)
 				switch tag {
 				case TagData2D:
-					fmt.Println(hex.Dump(value))
+					// fmt.Println(hex.Dump(value))
 				case TagVersion:
 					x, z := unmarshalChunkPos(key)
 					fmt.Println("\nChunk", x, z, "Version", value)
@@ -64,19 +65,23 @@ func Scan(fname string) {
 					// nbt.ReadAll(value)
 				case TagBiomeState:
 				case TagFinalizedState:
-					fmt.Println(hex.Dump(value))
+					// fmt.Println(hex.Dump(value))
 				default:
 					fmt.Printf("Unknown chunk tag: %#02x\n", tag)
 				}
-			} else if len(key) == 10 && Tag(key[8]) == TagSubChunk {
-				// x, z := unmarshalChunkPos(key)
-				// fmt.Println("SubChunk", x, z, key[9], len(value), "Version", value[0])
+			} else if len(key) == 10 && Tag(key[8]) == TagSection {
+				x, z := unmarshalChunkPos(key)
+				fmt.Println("SubChunk", x, z, key[9], len(value), "Version", value[0])
 			} else {
 				fmt.Println("Unknown key", string(key), hex.EncodeToString(key), len(value))
 			}
 
 		}
 
+	}
+	iter.Release()
+	if err := iter.Error(); err != nil {
+		panic(err)
 	}
 
 }
@@ -90,4 +95,62 @@ func MarshalChunkPos(data []byte, pos ChunkPos) {
 
 func unmarshalChunkPos(data []byte) (x, z int) {
 	return int(int32(binary.LittleEndian.Uint32(data[:4]))), int(int32(binary.LittleEndian.Uint32(data[4:8])))
+}
+
+func Fix(fname string) {
+	db, err := leveldb.OpenFile(fname, nil)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	var del [][]byte
+	_ = del
+
+	iter := db.NewIterator(nil, nil)
+	for iter.Next() {
+		key := iter.Key()
+		value := iter.Value()
+
+		if !KnownKeys[string(key)] {
+			if len(key) == 9 {
+
+				tag := Tag(key[8])
+				fmt.Println(tag)
+				switch tag {
+				case TagData2D:
+					// fmt.Println(hex.Dump(value))
+				case TagVersion:
+					x, z := unmarshalChunkPos(key)
+					fmt.Println("\nChunk", x, z, "Version", value)
+				case TagBlockEntity:
+					// readAll(value)
+					// nbt.ReadAll(value)
+				case TagEntity:
+					// readAll(value)
+					// nbt.ReadAll(value)
+				case TagBiomeState:
+				case TagFinalizedState:
+					// fmt.Println(hex.Dump(value))
+				default:
+					fmt.Printf("Unknown chunk tag: %#02x\n", tag)
+				}
+			} else if len(key) == 10 && Tag(key[8]) == TagSection {
+				if key[9] != 0 {
+
+				}
+				x, z := unmarshalChunkPos(key)
+				fmt.Println("SubChunk", x, z, key[9], len(value), "Version", value[0])
+			} else {
+				fmt.Println("Unknown key", string(key), hex.EncodeToString(key), len(value))
+			}
+
+		}
+
+	}
+	iter.Release()
+	if err := iter.Error(); err != nil {
+		panic(err)
+	}
+
 }
