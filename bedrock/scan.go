@@ -52,23 +52,25 @@ func Scan(fname string) {
 				tag := Tag(key[8])
 				switch tag {
 				case TagData2D:
+					fmt.Println(hex.Dump(value))
 				case TagVersion:
 					x, z := unmarshalChunkPos(key)
-					fmt.Println("Chunk", x, z, "Version", value)
+					fmt.Println("\nChunk", x, z, "Version", value)
 				case TagBlockEntity:
-					readAll(value)
+					// readAll(value)
 					// nbt.ReadAll(value)
 				case TagEntity:
-					readAll(value)
+					// readAll(value)
 					// nbt.ReadAll(value)
 				case TagBiomeState:
 				case TagFinalizedState:
+					fmt.Println(hex.Dump(value))
 				default:
-					fmt.Printf("Unknwon chunk tag: %#02x\n", tag)
+					fmt.Printf("Unknown chunk tag: %#02x\n", tag)
 				}
 			} else if len(key) == 10 && Tag(key[8]) == TagSubChunk {
-				x, z := unmarshalChunkPos(key)
-				fmt.Println("SubChunk", x, z, key[9], len(value), "Version", value[0])
+				// x, z := unmarshalChunkPos(key)
+				// fmt.Println("SubChunk", x, z, key[9], len(value), "Version", value[0])
 			} else {
 				fmt.Println("Unknown key", string(key), hex.EncodeToString(key), len(value))
 			}
@@ -77,6 +79,13 @@ func Scan(fname string) {
 
 	}
 
+}
+
+type ChunkPos struct{ X, Z int }
+
+func MarshalChunkPos(data []byte, pos ChunkPos) {
+	binary.LittleEndian.PutUint32(data, uint32(pos.X))
+	binary.LittleEndian.PutUint32(data[4:], uint32(pos.Z))
 }
 
 func unmarshalChunkPos(data []byte) (x, z int) {

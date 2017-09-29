@@ -107,7 +107,7 @@ func mapDecode(in interface{}, v interface{}) error {
 		return nil
 	}
 
-	if err := mapstructure.Decode(in, v); err != nil {
+	if err := mapstructure.WeakDecode(in, v); err != nil {
 		return err
 	}
 	return nil

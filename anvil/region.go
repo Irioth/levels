@@ -148,7 +148,7 @@ type ChunkPos struct {
 type Chunk struct {
 	ChunkPos
 	Timestamp uint32
-	Data      interface{}
+	Data      *ChunkData
 }
 
 type ChunkData struct {
@@ -158,8 +158,8 @@ type ChunkData struct {
 	TerrainPopulated bool
 	HeightMap        []int32
 	Biomes           []byte
-	Entities         []byte
-	TileEntities     []byte
+	Entities         []interface{}
+	TileEntities     []interface{}
 	Sections         []struct {
 		Y          byte
 		Blocks     []byte

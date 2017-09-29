@@ -32,6 +32,10 @@ func OpenDB(path string) (*DB, error) {
 	return &DB{db}, nil
 }
 
+func (db *DB) Put(key, value []byte) error {
+	return db.db.Put(key, value, nil)
+}
+
 func (db *DB) Close() error {
 	return db.db.Close()
 }

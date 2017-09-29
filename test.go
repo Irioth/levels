@@ -5,16 +5,25 @@ import (
 
 	"github.com/crystalmine/levels/anvil"
 	"github.com/crystalmine/levels/bedrock"
+	"github.com/crystalmine/levels/convert"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	if true {
-		bedrock.Scan("maps/mcpe-simple/db")
-		bedrock.ReadNbtFile("maps/mcpe-simple/level.dat")
+		if false {
+			if err := convert.PC2PE("maps/anvil-kathal", "maps/mcpe-conv"); err != nil {
+				panic(err)
+			}
+		} else {
+			bedrock.Scan("maps/mcpe-conv/db")
+			// bedrock.Scan("maps/mcpe-simple/db")
+			// bedrock.ReadNbtFile("maps/mcpe-simple/level.dat")
+		}
 	} else {
 		// anvil.Scan("maps/anvil-kathal")
 		l, err := anvil.LoadLevel("maps/anvil-kathal")
