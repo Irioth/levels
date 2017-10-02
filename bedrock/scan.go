@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/crystalmine/levels/anvil"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -34,12 +35,14 @@ var (
 	}
 )
 
-func Scan(fname string) {
+func Scan(fname string) map[anvil.ChunkPos]int {
 	db, err := leveldb.OpenFile(fname, nil)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+
+	cp := make(map[anvil.ChunkPos]int)
 
 	iter := db.NewIterator(nil, nil)
 	for iter.Next() {
@@ -57,6 +60,7 @@ func Scan(fname string) {
 				case TagVersion:
 					x, z := unmarshalChunkPos(key)
 					fmt.Println("\nChunk", x, z, "Version", value)
+					cp[anvil.ChunkPos{x, z}] = 1
 				case TagBlockEntity:
 					// readAll(value)
 					// nbt.ReadAll(value)
@@ -83,6 +87,7 @@ func Scan(fname string) {
 	if err := iter.Error(); err != nil {
 		panic(err)
 	}
+	return cp
 
 }
 

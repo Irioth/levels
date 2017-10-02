@@ -1,9 +1,11 @@
 package bedrock
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 type Level struct {
@@ -37,5 +39,10 @@ func (db *DB) Put(key, value []byte) error {
 }
 
 func (db *DB) Close() error {
+	err := db.db.CompactRange(util.Range{})
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
 	return db.db.Close()
 }
