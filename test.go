@@ -18,12 +18,12 @@ func main() {
 	// zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	// printmap()
 
-	conv()
+	// conv()
 
-	return
+	// return
 
 	if true {
-		if false {
+		if true {
 			if err := convert.PC2PE("maps/anvil-kathal", "maps/mcpe-conv"); err != nil {
 				panic(err)
 			}

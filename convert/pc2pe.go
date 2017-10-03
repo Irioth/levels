@@ -1,6 +1,8 @@
 package convert
 
 import (
+	"crystal/mc"
+	"crystal/mc/world"
 	"encoding/hex"
 	"fmt"
 
@@ -126,8 +128,8 @@ func convChunk(db *bedrock.DB, c anvil.Chunk) error {
 	// Data2D
 	data := make([]byte, 512+256)
 	for i := 0; i < 256; i++ {
-		// data[2*i] = byte(c.Data.HeightMap[i])
-		data[2*i] = 255
+		data[2*i] = byte(c.Data.HeightMap[i])
+		// data[2*i] = 255
 	}
 	// biomes
 	for i := 0; i < 256; i++ {
@@ -149,28 +151,27 @@ func convChunk(db *bedrock.DB, c anvil.Chunk) error {
 	}
 
 	// Sections
-	// for _, s := range c.Data.Sections {
-	for y := 0; y < 16; y++ {
+	for _, s := range c.Data.Sections {
+		// for y := 0; y < 16; y++ {
 
 		data := make([]byte, 1+4096+2048)
 		for x := 0; x < 16; x++ {
 			for y := 0; y < 16; y++ {
 				for z := 0; z < 16; z++ {
 					// if s.Blocks[(y*16+z)*16+x] != 0 {
-					data[(x*16+z)*16+y+1] = 7
+					// 	data[(x*16+z)*16+y+1] = 7
 					// }
-					// data[(x*16+z)*16+y+1] = s.Blocks[(y*16+z)*16+x]
+					data[(x*16+z)*16+y+1] = s.Blocks[(y*16+z)*16+x]
 				}
 			}
 		}
 
-		// q := world.NibbleArray(data[1+4096:])
-		// qq := world.NibbleArray(s.Data)
+		q := world.NibbleArray(data[1+4096:])
+		qq := world.NibbleArray(s.Data)
 		for x := 0; x < 16; x++ {
 			for y := 0; y < 16; y++ {
 				for z := 0; z < 16; z++ {
-
-					//					q.Set(mc.BlockPos{x, y, z}, qq.Get(mc.BlockPos{y, x, z}))
+					q.Set(mc.BlockPos{x, y, z}, qq.Get(mc.BlockPos{y, x, z}))
 				}
 			}
 		}
@@ -179,8 +180,8 @@ func convChunk(db *bedrock.DB, c anvil.Chunk) error {
 		// copy(data[1:], s.Blocks)
 		// copy(data[1+4096:], s.Data)
 		key[8] = byte(bedrock.TagSection)
-		// key[9] = s.Y
-		key[9] = byte(y)
+		key[9] = s.Y
+		// key[9] = byte(y)
 		if err := db.Put(key[:10], data); err != nil {
 			return err
 		}
